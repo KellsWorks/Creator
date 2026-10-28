@@ -1,0 +1,8 @@
+:root {
+  --v-font-body: 'Raleway', sans-serif;
+  --v-font-heading: 'Raleway', sans-serif;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+}
