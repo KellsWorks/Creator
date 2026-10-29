@@ -1,17 +1,20 @@
 import type { ModuleConfig } from '~/types/module'
+import { normalizeModule } from '~/configs/module'
 
 const STORAGE_KEY = 'creator:modules'
 
 export function useModules() {
   const modules = useState<ModuleConfig[]>('modules', () => [])
+  const loaded = useState('modules-loaded', () => false)
 
   function load() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) modules.value = JSON.parse(saved)
+      if (saved) modules.value = JSON.parse(saved).map(normalizeModule)
     } catch {
       // Storage can be unavailable (private mode, blocked site data); start empty.
     }
+    loaded.value = true
   }
 
   function persist() {
@@ -36,5 +39,5 @@ export function useModules() {
     persist()
   }
 
-  return { modules, load, save, remove }
+  return { modules, loaded, load, save, remove }
 }

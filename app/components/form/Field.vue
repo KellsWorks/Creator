@@ -7,6 +7,7 @@ import SelectInput from './fields/SelectInput.vue'
 import IconInput from './fields/IconInput.vue'
 import ColorInput from './fields/ColorInput.vue'
 import SwitchInput from './fields/SwitchInput.vue'
+import NumberInput from './fields/NumberInput.vue'
 
 // Add new field types here and in `FieldSchema`.
 const components: Record<FieldType, Component> = {
@@ -16,6 +17,7 @@ const components: Record<FieldType, Component> = {
   icon: IconInput,
   color: ColorInput,
   switch: SwitchInput,
+  number: NumberInput,
   // Async because a list renders field groups, which render fields.
   list: defineAsyncComponent(() => import('./fields/ListInput.vue')),
 }

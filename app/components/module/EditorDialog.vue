@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ModuleConfig } from '~/types/module'
-import { createModule, moduleFormSchema } from '~/configs/module'
+import { createModule, createModuleFormSchema } from '~/configs/module'
 
 const props = defineProps<{ module?: ModuleConfig | null }>()
 const emit = defineEmits<{ save: [module: ModuleConfig] }>()
@@ -9,6 +9,9 @@ const open = defineModel<boolean>({ default: false })
 const draft = ref<ModuleConfig>(createModule())
 const form = ref<{ validate: () => Promise<{ valid: boolean }> }>()
 const isEditing = computed(() => !!props.module)
+
+const { library } = useComponentLibrary()
+const schema = computed(() => createModuleFormSchema(library.value.custom))
 
 watch(open, (isOpen) => {
   if (isOpen) draft.value = props.module ? clone(props.module) : createModule()
@@ -34,14 +37,14 @@ async function save() {
       </v-toolbar>
 
       <v-card-text class="pa-0">
-        <v-container class="py-6">
+        <v-container fluid class="py-6 px-md-8">
           <v-row>
-            <v-col cols="12" md="7" lg="8">
-              <FormDynamicForm ref="form" v-model="draft" :schema="moduleFormSchema" />
+            <v-col cols="12" md="7">
+              <FormDynamicForm ref="form" v-model="draft" :schema="schema" tabs />
             </v-col>
-            <v-col cols="12" md="5" lg="4">
+            <v-col cols="12" md="5">
               <div class="preview">
-                <div class="text-overline text-medium-emphasis">Preview</div>
+                <div class="text-label-large text-uppercase text-medium-emphasis">Preview</div>
                 <ModulePreview :module="draft" />
               </div>
             </v-col>

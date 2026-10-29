@@ -1,4 +1,5 @@
-import type { FieldSchema, ValidationRule } from '~/types/form'
+import type { InjectionKey, Ref } from 'vue'
+import type { FieldSchema, FormModel, ValidationRule } from '~/types/form'
 
 const isEmpty = (value: unknown) =>
   value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)
@@ -26,9 +27,17 @@ export function buildRules(field: FieldSchema): ValidationRule[] {
   if ((field.type === 'text' || field.type === 'textarea') && field.maxLength) {
     rules.push(validators.maxLength(field.maxLength))
   }
+  if (field.type === 'number') {
+    const { min, max } = field
+    if (min !== undefined) rules.push(value => isEmpty(value) || value >= min || `Must be ${min} or more`)
+    if (max !== undefined) rules.push(value => isEmpty(value) || value <= max || `Must be ${max} or less`)
+  }
 
   return [...rules, ...(field.rules ?? [])]
 }
+
+/** The whole form's value, for fields whose options depend on other parts of the form. */
+export const formRootKey: InjectionKey<Ref<FormModel>> = Symbol('form-root')
 
 export const fieldLabel = (field: FieldSchema) => (field.required ? `${field.label} *` : field.label)
 

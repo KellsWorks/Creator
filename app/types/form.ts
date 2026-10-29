@@ -35,7 +35,10 @@ export type TextareaField = BaseField & {
 
 export type SelectField = BaseField & {
   type: 'select'
-  options: SelectOption[]
+  /** Fixed options, or options built from the whole form's current value. */
+  options: SelectOption[] | ((root: FormModel) => SelectOption[])
+  emptyText?: string
+  clearable?: boolean
 }
 
 export type IconField = BaseField & {
@@ -52,13 +55,44 @@ export type SwitchField = BaseField & {
   type: 'switch'
 }
 
+export type NumberField = BaseField & {
+  type: 'number'
+  placeholder?: string
+  min?: number
+  max?: number
+}
+
+export type ListVariant = {
+  label: string
+  icon?: string
+  fields: FieldSchema[]
+  newItem: () => FormModel
+}
+
+/** One entry in a list's "Add" menu. */
+export type ListTemplate = {
+  label: string
+  icon?: string
+  /** Menu heading the entry is listed under. */
+  group?: string
+  newItem: () => FormModel
+}
+
 export type ListField = BaseField & {
   type: 'list'
   /** Singular name for one entry, e.g. "Action". */
   itemLabel: string
-  fields: FieldSchema[]
-  newItem: () => FormModel
-  itemTitle?: (item: FormModel, index: number) => string
+  fields?: FieldSchema[]
+  newItem?: () => FormModel
+  /**
+   * Items of different kinds, each with its own fields. The kind is stored
+   * on the item under `variantKey` (default `type`).
+   */
+  variants?: Record<string, ListVariant>
+  variantKey?: string
+  /** What the "Add" menu offers. Defaults to one entry per variant. */
+  templates?: ListTemplate[]
+  itemTitle?: (item: FormModel, index: number) => string | undefined
   maxItems?: number
 }
 
@@ -69,12 +103,14 @@ export type FieldSchema =
   | IconField
   | ColorField
   | SwitchField
+  | NumberField
   | ListField
 
 export type FieldType = FieldSchema['type']
 
 export type FormSection = {
   title: string
+  icon?: string
   description?: string
   /** Bind the section's fields to `model[key]` instead of the model itself. */
   key?: string

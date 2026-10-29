@@ -4,8 +4,9 @@
 
     <v-app-bar color="primary">
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-app-bar-title>Dashboard</v-app-bar-title>
+      <v-app-bar-title>{{ title }}</v-app-bar-title>
       <template #append>
+        <v-btn icon="mdi-cog-outline" to="/components" aria-label="Components" />
         <v-btn
           :icon="theme.current.value.dark ? 'mdi-weather-sunny' : 'mdi-weather-night'"
           @click="theme.toggle()"
@@ -14,28 +15,28 @@
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" temporary>
-      <v-list nav>
-        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" active color="primary" />
+      <v-list nav color="primary">
+        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" to="/" exact />
+        <v-list-item prepend-icon="mdi-shape-outline" title="Components" to="/components" />
+        <template v-if="modules.length">
+          <v-list-subheader>Modules</v-list-subheader>
+          <v-list-item
+            v-for="module in modules"
+            :key="module.id"
+            :prepend-icon="module.icon"
+            :title="module.name"
+            :to="`/modules/${module.id}`"
+          />
+        </template>
       </v-list>
     </v-navigation-drawer>
 
     <v-main>
-      <v-container>
-        <v-empty-state
-          v-if="!modules.length"
-          icon="mdi-view-grid-plus-outline"
-          headline="No modules yet"
-          text="Tap the + button to create your first module."
-        />
-        <v-row v-else>
-          <v-col v-for="module in modules" :key="module.id" cols="12" sm="6" lg="4">
-            <ModuleCard :module="module" @edit="openEditor(module)" @remove="remove(module.id)" />
-          </v-col>
-        </v-row>
-      </v-container>
+      <NuxtPage />
     </v-main>
 
     <v-fab
+      v-if="route.path === '/'"
       icon
       color="primary"
       app
@@ -53,19 +54,21 @@
 
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
-import type { ModuleConfig } from '~/types/module'
 
 const theme = useTheme()
+const route = useRoute()
 const drawer = ref(false)
 
-const { modules, load, save, remove } = useModules()
-const editorOpen = ref(false)
-const editing = ref<ModuleConfig | null>(null)
+const { modules, load, save } = useModules()
+const { load: loadComponents } = useComponentLibrary()
+const { open: editorOpen, editing, openEditor } = useModuleEditor()
+const title = computed(() => {
+  if (route.path === '/components') return 'Components'
+  return modules.value.find(m => m.id === route.params.id)?.name ?? 'Dashboard'
+})
 
-function openEditor(module: ModuleConfig | null) {
-  editing.value = module
-  editorOpen.value = true
-}
-
-onMounted(load)
+onMounted(() => {
+  load()
+  loadComponents()
+})
 </script>

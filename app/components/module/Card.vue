@@ -6,7 +6,7 @@ defineEmits<{ edit: []; remove: [] }>()
 </script>
 
 <template>
-  <v-card class="h-100" @click="$emit('edit')">
+  <v-card class="h-100" :to="`/modules/${module.id}`">
     <v-card-item>
       <template #prepend>
         <v-avatar :color="module.color" variant="tonal" size="48">
@@ -15,15 +15,23 @@ defineEmits<{ edit: []; remove: [] }>()
       </template>
       <v-card-title>{{ module.name }}</v-card-title>
       <v-card-subtitle>
-        {{ module.actions.length }} {{ module.actions.length === 1 ? 'action' : 'actions' }}
+        {{ module.pages.length + 1 }} {{ module.pages.length ? 'pages' : 'page' }}
+        · {{ module.actions.length }} {{ module.actions.length === 1 ? 'action' : 'actions' }}
       </v-card-subtitle>
       <template #append>
+        <v-btn
+          icon="mdi-pencil-outline"
+          variant="text"
+          size="small"
+          :aria-label="`Edit ${module.name}`"
+          @click.prevent.stop="$emit('edit')"
+        />
         <v-btn
           icon="mdi-delete-outline"
           variant="text"
           size="small"
           :aria-label="`Delete ${module.name}`"
-          @click.stop="$emit('remove')"
+          @click.prevent.stop="$emit('remove')"
         />
       </template>
     </v-card-item>
